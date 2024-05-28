@@ -1,37 +1,29 @@
-public class Stack {
-    private Stack next;
-    private No node;
+public class Pilha {
+    private Pilha prox;
+    private No no;
 
     public void init(){
-        this.next = null;
-        this.node = null;
+        this.prox = null;
+        this.no = null;
     }
     public void push(No node){
-        Stack newStack = new Stack();
-        newStack.node = node;
-        newStack.next = this.next;
-        this.next = newStack;
+        Pilha newStack = new Pilha();
+        newStack.no = node;
+        newStack.prox = this.prox;
+        this.prox = newStack;
     }
 
     public No pop(){
-        No node = this.next.node;
-        this.next = this.next.next;
+        No node = this.prox.no;
+        this.prox = this.prox.prox;
         return node;
     }
 
+    public No top(){
+        return this.prox.no;
+    }
+
     public boolean isEmpty(){
-        return this.next == null;
-    }
-
-    public No peek(){
-        return this.next.node;
-    }
-
-    public void print(){
-        Stack current = this.next;
-        while(current != null){
-            System.out.println(current.node.getPalavra());
-            current = current.next;
-        }
+        return this.prox == null;
     }
 }

@@ -1,16 +1,14 @@
-import java.util.Objects;
-
 public class No {
     private char[] letras;
     private No[] filhos;
     private int indice;
     private String palavra;
 
-    public No(String string) {
+    public No(String palavra) {
         this.letras = new char[26];
         this.filhos = new No[26];
         this.indice = -1;
-        this.palavra = string;
+        this.palavra = palavra;
     }
 
     public No() {
@@ -18,6 +16,13 @@ public class No {
         this.filhos = new No[26];
         this.indice = -1;
         this.palavra = "";
+    }
+
+    public No(String palavra, int indice) {
+        this.letras = new char[26];
+        this.filhos = new No[26];
+        this.indice = indice;
+        this.palavra = palavra;
     }
 
     public char getLetras(int pos) {
@@ -66,31 +71,5 @@ public class No {
 
     public void setPalavra(String palavra) {
         this.palavra = palavra;
-    }
-
-    public No getImmediateWord() {
-        No node = null;
-        if (Objects.equals(this.palavra, "")) {
-            for (int i = 0; i < 26; i++) {
-                if (this.filhos[i] != null && !Objects.equals(this.filhos[i].getPalavra(), "")) {
-                    node = this.filhos[i];
-                }
-            }
-            return node;
-        }
-        return this;
-    }
-
-    public int primeiroFilho() {
-        boolean achou = false;
-        int i = 0;
-        while (i < 26 && !achou) {
-            if (this.filhos[i] != null) {
-                achou = true;
-            } else {
-                i++;
-            }
-        }
-        return i;
     }
 }
