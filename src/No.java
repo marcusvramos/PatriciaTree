@@ -18,13 +18,6 @@ public class No {
         this.palavra = "";
     }
 
-    public No(String palavra, int indice) {
-        this.letras = new char[26];
-        this.filhos = new No[26];
-        this.indice = indice;
-        this.palavra = palavra;
-    }
-
     public char getLetras(int pos) {
         return letras[pos];
     }

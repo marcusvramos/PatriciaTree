@@ -125,27 +125,31 @@ public class PatriciaTree {
     }
 
     public boolean buscarPalavra(String palavra) {
-        return buscarPalavraRecursivo(raiz, palavra);
-    }
+        Pilha pilha = new Pilha();
+        pilha.init();
+        pilha.push(raiz);
 
-    private boolean buscarPalavraRecursivo(No atual, String palavra) {
-        if (atual == null) {
-            return false;
-        }
+        boolean encontrada = false;
 
-        // Verifica se o nó atual contém a palavra procurada
-        if (atual.getPalavra().equals(palavra)) {
-            return true;
-        }
+        while (!pilha.isEmpty() && !encontrada) {
+            No atual = pilha.pop();
 
-        // Busca nos filhos do nó atual
-        for (No filho : atual.getFilhos()) {
-            if (buscarPalavraRecursivo(filho, palavra)) {
-                return true;
+            if (atual != null) {
+                if (atual.getPalavra().equals(palavra)) {
+                    encontrada = true;
+                }
+
+                // Busca nos filhos do nó atual
+                No[] filhos = atual.getFilhos();
+                for (int i = 0; i < filhos.length && !encontrada; i++) {
+                    if (filhos[i] != null) {
+                        pilha.push(filhos[i]);
+                    }
+                }
             }
         }
 
-        return false;
+        return encontrada;
     }
 
     public void exibirTodasPalavras() {
@@ -165,7 +169,6 @@ public class PatriciaTree {
             }
         }
     }
-
 
     public void exibirNosNivelANivel() {
         Fila fila = new Fila();
