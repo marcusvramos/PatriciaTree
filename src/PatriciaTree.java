@@ -1,205 +1,241 @@
 public class PatriciaTree {
-    private final No raiz;
+    private Node root;
 
     public PatriciaTree() {
-        this.raiz = new No();
+        this.root = null;
     }
 
-    public void inserir(String palavra) {
-        No atual = raiz;
-        No aux;
-        int pos = 0;
-        boolean inserido = false;
+    public void insert(String word) {
+        Node newNode = new Node(word);
 
-        if (raiz.getIndice() == -1) { // Caso 1: Raiz nula
-            tratarRaizNula(palavra);
+        if (root == null) {
+            root = new Node();
+            handleNullRootCase(newNode);
         } else {
-            while (!inserido) {
-                int indiceLetra = palavra.charAt(pos) - 'a';
-                aux = atual.getFilho(indiceLetra);
+            int pos = root.searchLetter(word.charAt(0));
+            if (pos == -1) {
+                root.insertLetter(word.charAt(0), newNode);
+            } else {
+                insertIntoTree(newNode, word, pos);
+            }
+        }
+    }
 
-                if (aux == null) { // Caso 2: Segue e não tem ligação na letra
-                    inserirSemLigacao(atual, palavra, pos, indiceLetra);
-                    inserido = true;
-                } else {
-                    String p2 = encontrarProximoNoNaoVazio(aux).getPalavra();
-                    int i = pos + 1;
-                    while (i < palavra.length() && i < p2.length() && palavra.charAt(i) == p2.charAt(i)) {
-                        i++;
-                    }
+    private void insertIntoTree(Node newNode, String word, int pos) {
+        NodeContext context = new NodeContext(root, root.getLink(pos), 1);
+        Node intermediaryNode = new Node();
 
-                    if (i == palavra.length() && i == p2.length()) {
-                        inserido = true; // Palavra já está na árvore
-                    } else if (i < p2.length() && i < palavra.length()) { // Caso 3: Inserindo 'galo' e posteriormente 'gel'
-                        criarNovoNoIntermediario(atual, aux, palavra, p2, i, indiceLetra);
-                        inserido = true;
-                    } else if (i == palavra.length() && i < p2.length()) { // Caso 4: Prefixo
-                        criarNoIntermediarioPrefixo(atual, aux, p2, i, indiceLetra);
-                        inserido = true;
-                    } else if (i < palavra.length()) { // Caso 5: Inserção padrão após nó intermediário
-                        criarNoAposNoIntermediario(atual, aux, palavra, i, indiceLetra);
-                        inserido = true;
+        boolean inserted = false;
+        int letterPos = pos;
+
+        while (context.currentNode.getLink(0) != null && context.currentNode.getIndex() <= word.length() && !inserted) {
+            if (context.currentNode.getIndex() == context.i) {
+                inserted = handleMatchingIndex(context, newNode, word);
+                if (!inserted) {
+                    letterPos = context.currentNode.searchLetter(word.charAt(context.i - 1));
+                }
+            } else {
+                String childToCompare = searchChildToBeCompare(context.currentNode, word, context.currentNode.getIndex() - 1);
+                int diff = findDifferentCharacter(childToCompare, word);
+                if (diff < context.currentNode.getIndex() - 1) {
+                    insertIntermediaryNode(context.previousNode, context.currentNode, intermediaryNode, childToCompare, word, diff, letterPos, newNode);
+                    inserted = true;
+                } else if (diff >= context.currentNode.getIndex() - 1) {
+                    letterPos = context.currentNode.searchLetter(word.charAt(context.currentNode.getIndex() - 1));
+                    if (letterPos == -1) {
+                        context.currentNode.insertLetter(word.charAt(context.currentNode.getIndex() - 1), newNode);
+                        inserted = true;
                     } else {
-                        pos = i;
-                        atual = aux;
+                        if (context.currentNode.getLink(0) == null) {
+                            splitWord(context.currentNode, newNode, letterPos);
+                            inserted = true;
+                        } else {
+                            context.previousNode = context.currentNode;
+                            context.currentNode = context.currentNode.getLink(letterPos);
+                        }
                     }
                 }
             }
         }
+        finalizeInsertion(newNode, word, context.previousNode, context.currentNode, intermediaryNode, inserted);
     }
 
-    public boolean buscarPalavra(String palavra) {
-        Pilha pilha = new Pilha();
-        pilha.init();
-        pilha.push(raiz);
+    private boolean handleMatchingIndex(NodeContext context, Node newNode, String word) {
+        int letterPos = context.currentNode.searchLetter(word.charAt(context.i - 1));
+        if (letterPos == -1) {
+            context.currentNode.insertLetter(word.charAt(context.i - 1), newNode);
+            return true;
+        } else {
+            context.previousNode = context.currentNode;
+            context.currentNode = context.currentNode.getLink(letterPos);
+            context.i++;
+            return false;
+        }
+    }
 
-        boolean encontrada = false;
+    private void insertIntermediaryNode(
+        Node previousNode,
+        Node currentNode,
+        Node intermediaryNode,
+        String childToCompare,
+        String word,
+        int difference,
+        int letterPos,
+        Node newNode
+    ) {
+        intermediaryNode.setIndex(difference + 1);
+        intermediaryNode.insertLetter(childToCompare.charAt(difference), currentNode);
+        intermediaryNode.insertLetter(word.charAt(difference), newNode);
+        previousNode.setLink(intermediaryNode, letterPos);
+    }
 
-        while (!pilha.isEmpty() && !encontrada) {
-            No atual = pilha.pop();
+    private void finalizeInsertion(
+        Node newNode,
+        String word,
+        Node previousNode,
+        Node currentNode,
+        Node intermediaryNode,
+        boolean inserted
+    ) {
+        if (currentNode.getLink(0) == null && !inserted) {
+            splitWord(previousNode, newNode, previousNode.searchLetter(word.charAt(previousNode.getIndex() - 1)));
+        } else if (currentNode.getIndex() > word.length() && !inserted) {
+            intermediaryNode.insertLetter(word.charAt(word.length() - 1), currentNode);
+            intermediaryNode.setIndex(word.length());
 
-            if (atual != null) {
-                if (atual.getPalavra().equals(palavra)) {
-                    encontrada = true;
-                }
+            currentNode.setWord(word);
 
-                // Busca nos filhos do nó atual
-                No[] filhos = atual.getFilhos();
-                for (int i = 0; i < filhos.length && !encontrada; i++) {
-                    if (filhos[i] != null) {
-                        pilha.push(filhos[i]);
+            int pos = previousNode.searchLetter(word.charAt(previousNode.getIndex() - 1));
+            previousNode.setLink(intermediaryNode, pos);
+            intermediaryNode.setLink(currentNode, intermediaryNode.searchLetter(word.charAt(word.length() - 1)));
+        }
+    }
+
+    private String searchChildToBeCompare(Node root, String word, int j) {
+        if (j < word.length()) {
+            char origin = word.charAt(j);
+            while (root.getLink(0) != null && root.searchLetter(origin) >= 0) {
+                root = root.getLink(root.searchLetter(origin));
+                origin = word.charAt(j);
+                j++;
+            }
+        }
+        while (root.getLink(0) != null) {
+            root = root.getLink(0);
+        }
+        return root.getWord();
+    }
+
+    private void splitWord(Node root, Node newNode, int pos) {
+        Node currentNode = root.getLink(pos);
+        int differentPos = findDifferentCharacter(newNode.getWord(), currentNode.getWord());
+        Node intermediaryNode = new Node();
+
+        if (differentPos == newNode.getWord().length()) {
+            intermediaryNode.setWord(newNode.getWord());
+            intermediaryNode.insertLetter(currentNode.getWord().charAt(differentPos), currentNode);
+        } else if (differentPos == currentNode.getWord().length()) {
+            intermediaryNode.setWord(currentNode.getWord());
+            intermediaryNode.insertLetter(newNode.getWord().charAt(differentPos), newNode);
+        } else {
+            intermediaryNode.insertLetter(newNode.getWord().charAt(differentPos), newNode);
+            intermediaryNode.insertLetter(currentNode.getWord().charAt(differentPos), currentNode);
+        }
+        intermediaryNode.setIndex(differentPos + 1);
+        root.setLink(intermediaryNode, pos);
+    }
+
+    public int findDifferentCharacter(String firstWord, String secondWord) {
+        int k = 0;
+        while (
+            k < firstWord.length() &&
+            k < secondWord.length() &&
+            firstWord.charAt(k) == secondWord.charAt(k)
+        )
+            k++;
+
+        return k;
+    }
+
+    private void handleNullRootCase(Node newNode) {
+        root.setLink(newNode, 0);
+        root.setIndex(1);
+        root.setLetter(newNode.getWord().charAt(0), 0);
+        root.setLetterCount(1);
+    }
+
+    public boolean searchWord(String word) {
+        Stack stack = new Stack();
+        stack.init();
+        stack.push(root);
+
+        boolean found = false;
+
+        while (!stack.isEmpty() && !found) {
+            Node currentNode = stack.pop();
+
+            if (currentNode != null) {
+                if (currentNode.getWord().equals(word)) {
+                    found = true;
+                } else {
+                    for (int i = 0; i < currentNode.getLetterCount(); i++) {
+                        stack.push(currentNode.getLink(i));
                     }
                 }
             }
         }
-
-        return encontrada;
+        return found;
     }
 
-    public void exibirTodasPalavras() {
-        Pilha pilha = new Pilha();
-        pilha.init();
-        pilha.push(raiz);
+    public void displayAllWords() {
+        Stack stack = new Stack();
+        stack.init();
+        stack.push(root);
 
-        while (!pilha.isEmpty()) {
-            No atual = pilha.pop();
-            if (!atual.getPalavra().isEmpty()) {
-                System.out.println(atual.getPalavra());
+        while (!stack.isEmpty()) {
+            Node currentNode = stack.pop();
+            if (!currentNode.getWord().isEmpty()) {
+                System.out.println(currentNode.getWord());
             }
-            for (No filho : atual.getFilhos()) {
-                if (filho != null) {
-                    pilha.push(filho);
+            for (Node child : currentNode.getLinks()) {
+                if (child != null) {
+                    stack.push(child);
                 }
             }
         }
     }
 
-    public void exibirNosNivelANivel() {
-        Fila fila = new Fila();
-        fila.ini();
-        fila.enqueue(raiz, 0);
+    public void displayNodesLevelByLevel() {
+        Queue queue = new Queue();
+        queue.init();
+        queue.enqueue(root, 0);
 
-        while (!fila.isEmpty()) {
-            NoFila noFila = fila.dequeue();
-            No atual = noFila.getInfo();
-            int nivel = noFila.getNivel();
+        while (!queue.isEmpty()) {
+            NodeQueue nodeQueue = queue.dequeue();
+            Node currentNode = nodeQueue.getInfo();
+            int level = nodeQueue.getLevel();
 
             System.out.println(
-                "Nível " + nivel +
-                ": " + construirStringLetras(atual.getLetras()) +
-                " Palavra: " + atual.getPalavra() +
-                " Índice: " + atual.getIndice()
+                "Nível " + level +
+                ": " + buildLetterString(currentNode.getLetters()) +
+                " Palavra: " + currentNode.getWord() +
+                " Índice: " + currentNode.getIndex()
             );
 
-            for (No filho : atual.getFilhos()) {
-                if (filho != null) {
-                    fila.enqueue(filho, nivel + 1);
+            for (Node child : currentNode.getLinks()) {
+                if (child != null) {
+                    queue.enqueue(child, level + 1);
                 }
             }
         }
     }
 
-    private No encontrarProximoNoNaoVazio(No no) {
-        boolean encontrouPalavra = false;
-
-        while (no.getPalavra().isEmpty() && !encontrouPalavra) {
-            encontrouPalavra = true;
-            No proximoNoNaoVazio = null;
-
-            for (No filho : no.getFilhos()) {
-                if (filho != null) {
-                    proximoNoNaoVazio = filho;
-                    encontrouPalavra = false;
-                }
-            }
-
-            if (proximoNoNaoVazio != null) {
-                no = proximoNoNaoVazio;
-            }
-        }
-
-        return no;
-    }
-
-    private void tratarRaizNula(String palavra) {
-        raiz.setLetras(palavra.charAt(0), palavra.charAt(0) - 'a');
-        raiz.setIndice(1);
-        No novoNo = new No(palavra);
-        raiz.setFilho(novoNo, palavra.charAt(0) - 'a');
-    }
-
-    private void inserirSemLigacao(No atual, String palavra, int pos, int indiceLetra) {
-        No novoNo = new No(palavra);
-        atual.setLetras(palavra.charAt(pos), indiceLetra);
-        atual.setFilho(novoNo, indiceLetra);
-    }
-
-    private void criarNovoNoIntermediario(No atual, No aux, String palavra, String p2, int i, int indiceLetra) {
-        No novoNoIntermediario = new No();
-        novoNoIntermediario.setIndice(i + 1);
-
-        novoNoIntermediario.setLetras(p2.charAt(i), p2.charAt(i) - 'a');
-        novoNoIntermediario.setFilho(aux, p2.charAt(i) - 'a');
-
-        No novoNo = new No(palavra);
-        novoNoIntermediario.setLetras(palavra.charAt(i), palavra.charAt(i) - 'a');
-        novoNoIntermediario.setFilho(novoNo, palavra.charAt(i) - 'a');
-
-        atual.setFilho(novoNoIntermediario, indiceLetra);
-    }
-
-    private void criarNoIntermediarioPrefixo(No atual, No aux, String p2, int i, int indiceLetra) {
-        No novoNoIntermediario = new No();
-        novoNoIntermediario.setIndice(i);
-
-        char letraAtual = p2.charAt(i - 1);
-        novoNoIntermediario.setLetras(letraAtual, letraAtual - 'a');
-        novoNoIntermediario.setFilho(aux, letraAtual - 'a');
-
-        aux.setPalavra(p2.substring(0, i));
-
-        atual.setFilho(novoNoIntermediario, indiceLetra);
-    }
-
-    private void criarNoAposNoIntermediario(No atual, No aux, String palavra, int i, int indiceLetra) {
-        No novoNoIntermediario = new No();
-        novoNoIntermediario.setIndice(i + 1);
-
-        novoNoIntermediario.setLetras(palavra.charAt(i - 1), palavra.charAt(i - 1) - 'a');
-        novoNoIntermediario.setFilho(aux, palavra.charAt(i - 1) - 'a');
-
-        No novoNo = new No(palavra);
-        novoNoIntermediario.setFilho(novoNo, palavra.charAt(i) - 'a');
-
-        atual.setFilho(novoNoIntermediario, indiceLetra);
-    }
-
-    private String construirStringLetras(char[] letras) {
+    private String buildLetterString(char[] letters) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (char letra : letras) {
-            if (letra != '\u0000') {
-                sb.append(letra).append(", ");
+        for (char letter : letters) {
+            if (letter != '\u0000') {
+                sb.append(letter).append(", ");
             }
         }
         if (sb.length() > 1) {

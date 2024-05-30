@@ -1,32 +1,32 @@
-public class Fila {
-    private NoFila ini;
+public class Queue {
+    private NodeQueue ini;
 
-    public Fila() {}
+    public Queue() {}
 
-    public void ini()
+    public void init()
     {
         ini=null;
     }
 
-    public void enqueue(No info, int nivel)
+    public void enqueue(Node info, int nivel)
     {
-        NoFila novo = new NoFila(info,nivel);
+        NodeQueue novo = new NodeQueue(info,nivel);
         if(ini==null)
             ini=novo;
         else
         {
-            NoFila aux = ini;
+            NodeQueue aux = ini;
             while(aux.getProx()!=null)
                 aux = aux.getProx();
             aux.setProx(novo);
         }
     }
 
-    public NoFila dequeue()
+    public NodeQueue dequeue()
     {
         if(ini!=null)
         {
-            NoFila aux = ini;
+            NodeQueue aux = ini;
             ini = ini.getProx();
             return aux;
         }
