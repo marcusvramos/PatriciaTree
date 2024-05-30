@@ -19,10 +19,6 @@ public class Stack {
         return node;
     }
 
-    public Node top(){
-        return this.prox.no;
-    }
-
     public boolean isEmpty(){
         return this.prox == null;
     }

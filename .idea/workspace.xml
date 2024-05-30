@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a469d8e9-4257-4db5-a814-e849f7f798ac" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Node.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/NodeContext.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DiagramUMLPatricia.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Aplicacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Aplicacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Fila.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Queue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/No.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/NoFila.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NodeQueue.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/PatriciaTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/PatriciaTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Pilha.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Stack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Stack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Stack.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +121,7 @@
       <workItem from="1717022659854" duration="873000" />
       <workItem from="1717026400551" duration="2170000" />
       <workItem from="1717077809921" duration="62000" />
-      <workItem from="1717093036017" duration="6450000" />
+      <workItem from="1717093036017" duration="8134000" />
     </task>
     <servers />
   </component>

@@ -145,7 +145,7 @@ public class PatriciaTree {
         root.setLink(intermediaryNode, pos);
     }
 
-    public int findDifferentCharacter(String firstWord, String secondWord) {
+    private int findDifferentCharacter(String firstWord, String secondWord) {
         int k = 0;
         while (
             k < firstWord.length() &&
