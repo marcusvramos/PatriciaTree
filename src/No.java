@@ -34,7 +34,7 @@ public class No {
         this.letras = letras;
     }
 
-    public No getFilhos(int pos) {
+    public No getFilho(int pos) {
         return filhos[pos];
     }
 
@@ -42,12 +42,8 @@ public class No {
         return filhos;
     }
 
-    public void setFilhos(No filhos, int pos) {
+    public void setFilho(No filhos, int pos) {
         this.filhos[pos] = filhos;
-    }
-
-    public void setFilhos(No[] filhos) {
-        this.filhos = filhos;
     }
 
     public int getIndice() {
